@@ -23,6 +23,17 @@ def acessar():
         LabelMensagem['text'] = 'User não está cadastrado.'
 
 
+def alterar():
+    file_xl = load_workbook(filename='Logins.xlsx')
+    logins = file_xl.active
+    logins['B' + str(navpos)] = Senha.get()
+    logins['D' + str(navpos)] = Nome.get()
+    logins['E' + str(navpos)] = Idade.get()
+    file_xl.save(filename='Logins.xlsx')
+    LabelMensagem['text'] = 'Dados alterados.'
+    tela_painel(navpos)
+
+
 def cadastar():
     file_xl = load_workbook(filename='Logins.xlsx')
     logins = file_xl.active
@@ -41,7 +52,7 @@ def cadastar():
         LabelMensagem['text'] = 'Usuário não atende o crítério.'
     elif exist_email is True:
         LabelMensagem['text'] = 'Este E-mail já está cadastrado.'
-    elif '@' or '.' not in Email.get() and ' ' in Email.get():
+    elif '@' not in Email.get() or '.' not in Email.get() or ' ' in Email.get():
         LabelMensagem['text'] = 'E-mail não atende o crítério.'
     else:
         pos_tab = 1
@@ -54,29 +65,6 @@ def cadastar():
         logins['E' + str(pos_tab)] = Idade.get()
         file_xl.save(filename='Logins.xlsx')
         LabelMensagem['text'] = 'Cadastro efetuado com sucesso.'
-
-
-def alterar():
-    file_xl = load_workbook(filename='Logins.xlsx')
-    logins = file_xl.active
-    logins['B' + str(navpos)] = Senha.get()
-    logins['D' + str(navpos)] = Nome.get()
-    logins['E' + str(navpos)] = Idade.get()
-    file_xl.save(filename='Logins.xlsx')
-    LabelMensagem['text'] = 'Dados alterados.'
-    tela_painel(navpos)
-
-
-def alterar():
-    file_xl = load_workbook(filename='Logins.xlsx')
-    logins = file_xl.active
-
-    logins['B' + str(navpos)] = Senha.get()
-    logins['D' + str(navpos)] = Nome.get()
-    logins['E' + str(navpos)] = Idade.get()
-    file_xl.save(filename='Logins.xlsx')
-    LabelMensagem['text'] = 'Dados alterados.'
-    tela_painel(navpos)
 
 
 def remover():
@@ -92,9 +80,23 @@ def remover():
     tela_login()
 
 
-def tela_cadastro():
-    Choose.set('2')
-    TelaLogin.destroy()
+def reset_senha():
+    file_xl = load_workbook(filename='Logins.xlsx')
+    logins = file_xl.active
+    pos_tab = 1
+    while logins['A' + str(pos_tab)].value is not None:
+        if logins['A' + str(pos_tab)].value == Username.get():
+            if logins['C' + str(pos_tab)].value == Email.get():
+                logins['B' + str(pos_tab)] = 'Senha12345'
+                file_xl.save(filename='Logins.xlsx')
+                LabelMensagem['text'] = 'Sua senha é, Senha12345, clique em voltar.'
+                break
+            else:
+                LabelMensagem['text'] = 'E-mail inválido.'
+                break
+        pos_tab += 1
+    if logins['A' + str(pos_tab)].value is None:
+        LabelMensagem['text'] = 'User não foi encontrado.'
 
 
 def tela_login():
@@ -102,26 +104,36 @@ def tela_login():
     TelaLogin.destroy()
 
 
-def tela_painel(pos):
+def tela_nova_senha():
+    Choose.set('2')
+    TelaLogin.destroy()
+
+
+def tela_cadastro():
     Choose.set('3')
+    TelaLogin.destroy()
+
+
+def tela_painel(pos):
+    Choose.set('4')
     UserId.set(pos)
     TelaLogin.destroy()
 
 
 def voltar_painel():
-    Choose.set('3')
-    UserId.set(navpos)
-    TelaLogin.destroy()
-
-
-def tela_alterar():
     Choose.set('4')
     UserId.set(navpos)
     TelaLogin.destroy()
 
 
-def tela_remover():
+def tela_alterar():
     Choose.set('5')
+    UserId.set(navpos)
+    TelaLogin.destroy()
+
+
+def tela_remover():
+    Choose.set('6')
     UserId.set(navpos)
     TelaLogin.destroy()
 
@@ -152,20 +164,59 @@ while True:
         ButtonLogin = Button(TelaLogin, text='Acessar', command=acessar, padx=PadSize, pady=PadSize, font=FontSize)
         ButtonLogin.grid(column=1, row=3, sticky='E , W')
 
+        ButtonnNovaSenha = Button(TelaLogin, text='Esqueci a senha', command=tela_nova_senha, padx=PadSize, pady=PadSize, font=FontSize)
+        ButtonnNovaSenha.grid(column=1, row=4, sticky='E , W')
+
         ButtonCadastro = Button(TelaLogin, text='Cadastrar Novo Username', command=tela_cadastro, padx=PadSize, pady=PadSize, font=FontSize)
-        ButtonCadastro.grid(column=1, row=4, sticky='E , W')
+        ButtonCadastro.grid(column=1, row=5, sticky='E , W')
 
         ButtonSair = Button(TelaLogin, text='Sair', command=quit, padx=PadSize, pady=PadSize, font=FontSize)
-        ButtonSair.grid(column=1, row=5, sticky='E , W')
+        ButtonSair.grid(column=1, row=6, sticky='E , W')
 
         LabelMensagem = Label(TelaLogin, text='', padx=PadSize, pady=PadSize, justify='left', font=FontSize)
-        LabelMensagem.grid(column=1, row=6, sticky='W')
+        LabelMensagem.grid(column=1, row=7, sticky='W')
 
         TelaLogin.mainloop()
         Menu = int(Choose.get())
         navpos = str(UserId.get())
 
     if Menu == 2:
+        TelaLogin = Tk()
+
+        PadSize = 3
+        FontSize = 15
+
+        TelaLogin.title('Esqueci a senha')
+
+        Username = StringVar()
+        Email = StringVar()
+
+        LabelMensagem = Label(TelaLogin, text='Digite os dados abaixo e confirme.', padx=PadSize, pady=PadSize, justify='left', font=FontSize)
+        LabelMensagem.grid(column=0, columnspan=2, row=1, sticky='N , S')
+
+        LabelUser = Label(TelaLogin, text='Username', padx=PadSize, pady=PadSize, justify='left', font=FontSize)
+        LabelUser.grid(column=0, row=2, sticky='W')
+        EntryUser = Entry(TelaLogin, textvariable=Username, font=FontSize)
+        EntryUser.grid(column=1, row=2)
+
+        LabelEmail = Label(TelaLogin, text='E-Mail', padx=PadSize, pady=PadSize, justify='left', font=FontSize)
+        LabelEmail.grid(column=0, row=3, sticky='W')
+        EntryEmail = Entry(TelaLogin, textvariable=Email, font=FontSize)
+        EntryEmail.grid(column=1, row=3)
+
+        ButtonConfirma = Button(TelaLogin, text='Confirmar', command=reset_senha, padx=PadSize, pady=PadSize, font=FontSize)
+        ButtonConfirma.grid(column=1, row=4, sticky='N , S, W, E')
+
+        ButtonVoltar = Button(TelaLogin, text='Voltar', command=tela_login, padx=PadSize, pady=PadSize, font=FontSize)
+        ButtonVoltar.grid(column=1, row=5, sticky='N , S, W, E')
+
+        LabelMensagem = Label(TelaLogin, text='', padx=PadSize, pady=PadSize, justify='left', font=FontSize)
+        LabelMensagem.grid(column=0, columnspan=2, row=6, sticky='N , S')
+
+        TelaLogin.mainloop()
+        Menu = int(Choose.get())
+
+    if Menu == 3:
         TelaLogin = Tk()
 
         PadSize = 3
@@ -216,17 +267,17 @@ while True:
         TelaLogin.mainloop()
         Menu = int(Choose.get())
 
-    if Menu == 3:
+    if Menu == 4:
         TelaLogin = Tk()
 
         pad_size = 3
         font_size = 15
 
         TelaLogin.title('Painel de Controle')
-        UserId = StringVar()
-        contagem_total = 4
 
-        label_welcome = Label(TelaLogin, text='Bem Vindo ' + str(navpos), padx=pad_size, pady=pad_size, justify='left', font=font_size)
+        #UserId = StringVar()
+        contagem_total = 4
+        label_welcome = Label(TelaLogin, text='Bem Vindo ' + User.get(), padx=pad_size, pady=pad_size, justify='left', font=font_size)
         label_welcome.grid(column=0, row=0, sticky='W')
 
         button_alterar = Button(TelaLogin, text='Alterar dados da conta', command=tela_alterar, padx=pad_size, pady=pad_size, font=font_size)
@@ -245,7 +296,7 @@ while True:
         Menu = int(Choose.get())
         navpos = str(UserId.get())
 
-    if Menu == 4:
+    if Menu == 5:
         TelaLogin = Tk()
 
         PadSize = 3
@@ -290,7 +341,7 @@ while True:
         Menu = int(Choose.get())
         navpos = str(UserId.get())
 
-    if Menu == 5:
+    if Menu == 6:
         TelaLogin = Tk()
 
         PadSize = 3
@@ -298,7 +349,7 @@ while True:
 
         TelaLogin.title('Remover User')
 
-        label_aviso = Label(TelaLogin, text='Alerta ao user: ' + str(navpos), padx=pad_size, pady=pad_size, justify='left', font=font_size)
+        label_aviso = Label(TelaLogin, text='Alerta ao user: ' + User.get(), padx=pad_size, pady=pad_size, justify='left', font=font_size)
         label_aviso.grid(column=0, row=0, sticky='W')
         LabelMensagem = Label(TelaLogin, text='AVISO: Esta ação remove o seu user do sistema!', padx=PadSize, pady=PadSize, justify='left', font=FontSize)
         LabelMensagem.grid(column=0, row=1, sticky='N , S')

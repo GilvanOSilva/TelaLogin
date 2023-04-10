@@ -4,8 +4,8 @@ from time import sleep
 
 
 class UserSys(Tk):
-    def __init__(self, *args, **kargs):
-        Tk.__init__(self, *args, **kargs)
+    def __init__(self):
+        Tk.__init__(self)
         screen = Frame(self)
         screen.pack()
         self.frames = {}
@@ -20,9 +20,13 @@ class UserSys(Tk):
         frame = self.frames[page_name]
         frame.tkraise()
         frame.label_message['text'] = ''
+        Login.username.set('')
+        Login.password.set('')
 
 
 class Login(Frame):
+    username = None
+    password = None
     label_message = None
 
     def __init__(self, parent, controller):
@@ -30,15 +34,15 @@ class Login(Frame):
         self.controller = controller
         pad_size = 5
         font_size = 5
-        username = StringVar()
-        password = StringVar()
+        Login.username = StringVar()
+        Login.password = StringVar()
         label_user = Label(self, text='Username', padx=pad_size, pady=pad_size, justify='left', font=font_size)
         label_user.grid(column=0, row=0, sticky='W')
-        entry_user = Entry(self, textvariable=username, font=font_size)
+        entry_user = Entry(self, textvariable=Login.username, font=font_size)
         entry_user.grid(column=1, row=0)
         label_password = Label(self, text='Senha', padx=pad_size, pady=pad_size, justify='left', font=font_size)
         label_password.grid(column=0, row=1, sticky='W')
-        entry_password = Entry(self, show='*', textvariable=password, font=font_size)
+        entry_password = Entry(self, show='*', textvariable=Login.password, font=font_size)
         entry_password.grid(column=1, row=1)
         button_login = Button(self, text='Acessar', command=lambda: self.access(entry_user.get(), entry_password.get()), padx=pad_size, pady=pad_size, font=font_size)
         button_login.grid(column=1, row=2, sticky='E , W')
@@ -113,7 +117,7 @@ class Registry(Frame):
         button_registry.grid(column=1, row=5, sticky='N , S, W, E')
         button_return = Button(self, text='Voltar', command=lambda: controller.show_frame('Login'), padx=pad_size, pady=pad_size, font=font_size)
         button_return.grid(column=1, row=6, sticky='N , S, W, E')
-        Registry.label_message = Label(self, text='', padx=pad_size, pady=pad_size, justify='left', relief='sunken', font=font_size)
+        Registry.label_message = Label(self, text='', padx=pad_size, pady=pad_size, justify='left', relief='sunken', font=font_size, width=25)
         Registry.label_message.grid(column=1, row=7, sticky='EW')
 
     def registry_user(self, username, password, email, name, age):
@@ -140,6 +144,8 @@ class Registry(Frame):
             pos_tab = 1
             while users['A' + str(pos_tab)].value is not None:
                 pos_tab += 1
+                if users['A' + str(pos_tab)].value == 'Null':
+                    break
             users['A' + str(pos_tab)] = username
             users['B' + str(pos_tab)] = password
             users['C' + str(pos_tab)] = email
@@ -216,7 +222,6 @@ class ControlPanel(Frame):
         button_return.grid(column=0, row=4, sticky='N , S, W, E')
         label_total_user = Label(self, text='Total de users cadastrados: ' + str(contagem_total), padx=pad_size, pady=pad_size, justify='left', font=font_size)
         label_total_user.grid(column=0, row=5, sticky='EW')
-
 
     def total_users(self):
         file_xl = load_workbook(filename='Users.xlsx')
@@ -296,7 +301,7 @@ class Remove(Frame):
         global POS
         file_xl = load_workbook(filename='Users.xlsx')
         users = file_xl.active
-        users['A' + str(POS)] = None
+        users['A' + str(POS)] = "Null"
         users['B' + str(POS)] = None
         users['C' + str(POS)] = None
         users['D' + str(POS)] = None
